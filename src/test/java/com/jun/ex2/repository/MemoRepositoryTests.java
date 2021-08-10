@@ -8,9 +8,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.annotation.Commit;
 
 import javax.transaction.Transactional;
 import java.lang.reflect.Member;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -125,5 +127,33 @@ public class MemoRepositoryTests {
         result.get().forEach(memo -> {
             System.out.println(memo);
         });
+    }
+
+    //쿼리 메서드
+    @Test
+    public void testQueryMethods(){
+        List<Memo> list = memoRepository.findByMnoBetweenOrderByMnoDesc(70L, 80L);
+
+        for (Memo memo : list){
+            System.out.println(memo);
+        }
+    }
+
+    //쿼리 메서드 + Pageable 결합
+    @Test
+    public void testQueryMethodWithPageable(){
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("mno").descending());
+
+        Page<Memo> result = memoRepository.findByMnoBetween(10L, 50L, pageable);
+
+        result.get().forEach(memo -> System.out.println(memo));
+    }
+
+    //쿼리 메서드 - 삭제처리 : 하나씩 삭제해서 비효율적이다. -> deleteBy를 이용하는 방식보다는 @Query를 이용해서 개선
+    @Commit
+    @Transactional
+    @Test
+    public void testDeleteQueryMethods(){
+        memoRepository.deleteMemoByMnoLessThan(10L);
     }
 }
